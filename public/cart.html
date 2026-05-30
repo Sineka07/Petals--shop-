@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cart — Petal Shop 🌸</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Lora:ital,wght@0,400;0,600;1,400&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div id="particles"></div>
+  <nav class="navbar" id="navbar"></nav>
+  <div id="toast"></div>
+
+  <section class="section">
+    <h2 class="section-title">Your Cart</h2>
+    <div style="display:grid;grid-template-columns:1fr 320px;gap:32px;align-items:start" id="cart-layout">
+      <div id="cart-items"><div class="empty-state"><div class="empty-icon">🛒</div><p>Loading...</p></div></div>
+      <div class="cart-summary" id="cart-summary" style="display:none">
+        <h3 style="font-family:var(--font-display);font-size:20px;margin-bottom:16px">Order Summary</h3>
+        <div class="summary-row"><span>Subtotal</span><span id="subtotal">$0.00</span></div>
+        <div class="summary-row"><span>Shipping</span><span>Free 🌸</span></div>
+        <div class="summary-total"><span>Total</span><span id="total">$0.00</span></div>
+        <button class="btn btn-primary" style="width:100%;margin-top:20px" onclick="location.href='/checkout'">
+          Checkout →
+        </button>
+        <a href="/shop" class="btn btn-outline" style="width:100%;margin-top:10px;justify-content:center">Continue Shopping</a>
+      </div>
+    </div>
+  </section>
+
+  <footer><span class="footer-logo">🌸 Petal Shop</span></footer>
+
+  <script src="/js/app.js"></script>
+  <script>
+    async function loadCart() {
+      const items = await Cart.get();
+      const el    = document.getElementById('cart-items');
+      if (!items.length) {
+        el.innerHTML = `<div class="empty-state">
+          <div class="empty-icon">🛒</div>
+          <h3>Your cart is empty</h3>
+          <p>Add some beautiful products!</p>
+          <a href="/shop" class="btn btn-primary" style="margin-top:16px">Shop Now</a>
+        </div>`;
+        return;
+      }
+      document.getElementById('cart-summary').style.display = 'block';
+      let subtotal = 0;
+      el.innerHTML = items.map(item => {
+        const lineTotal = item.product.price * item.quantity;
+        subtotal += lineTotal;
+        return `
+          <div class="cart-item" id="item-${item.productId}">
+            <div class="cart-item-img">${item.product.image}</div>
+            <div class="cart-item-info">
+              <div class="cart-item-name">${item.product.name}</div>
+              <div class="cart-item-price">$${item.product.price.toFixed(2)} each</div>
+            </div>
+            <div class="qty-controls">
+              <button class="qty-btn" onclick="updateQty(${item.productId}, ${item.quantity - 1})">−</button>
+              <span class="qty-num">${item.quantity}</span>
+              <button class="qty-btn" onclick="updateQty(${item.productId}, ${item.quantity + 1})">+</button>
+            </div>
+            <div style="font-family:var(--font-display);font-size:18px;font-weight:600;color:var(--accent);min-width:70px;text-align:right">
+              $${lineTotal.toFixed(2)}
+            </div>
+            <button class="remove-btn" onclick="removeItem(${item.productId})">🗑️</button>
+          </div>
+        `;
+      }).join('');
+      document.getElementById('subtotal').textContent = '$' + subtotal.toFixed(2);
+      document.getElementById('total').textContent    = '$' + subtotal.toFixed(2);
+    }
+
+    async function updateQty(productId, qty) {
+      await Cart.update(productId, qty);
+      loadCart();
+    }
+    async function removeItem(productId) {
+      await Cart.remove(productId);
+      loadCart();
+    }
+
+    document.addEventListener('DOMContentLoaded', loadCart);
+  </script>
+</body>
+</html>
