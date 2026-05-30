@@ -92,7 +92,11 @@
         const line = item.product.price * item.quantity;
         total += line;
         return `<div class="summary-row">
-          <span>${item.product.image} ${item.product.name} × ${item.quantity}</span>
+          <span>${item.product.image.startsWith('/') 
+    ? `<img src="${item.product.image}" style="width:28px;height:28px;object-fit:cover;border-radius:4px;vertical-align:middle;" />`
+    : item.product.image
+  } 
+  ${item.product.name} × ${item.quantity}</span>
           <span>$${line.toFixed(2)}</span>
         </div>`;
       }).join('');

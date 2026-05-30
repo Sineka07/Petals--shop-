@@ -265,8 +265,8 @@ a, button { transition: all 0.2s ease !important; }
 .product-img {
   width: 100%; aspect-ratio: 1;
   display: flex; align-items: center; justify-content: center;
-  font-size: 72px;
-  background: var(--bg2);
+  height: 100%;
+  object-fit: cover;
 }
 .product-body { padding: 16px; }
 .product-category {
