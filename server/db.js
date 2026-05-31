@@ -16,17 +16,17 @@ function seedProducts(db) {
   if (db.products.length > 0) return;
   const products = [
     { name:"Sakura Perfume",     description:"Delicate cherry blossom fragrance",       price:29.99, image:"/images/sakuraperfume.jpg", category:"Beauty",     stock:15 },
-    { name:"Rain Lamp",          description:"Soothing rainfall simulation lamp",        price:49.99, image:"/images/rainlamp.jpg", category:"Home",       stock:8  },
-    { name:"Sun Tea Set",        description:"Handcrafted ceramic sunny day tea set",    price:39.99, image:"/images/sunteaset.jpg", category:"Kitchen",    stock:12 },
-    { name:"Petal Silk Scarf",   description:"Flowing silk with cherry blossom print",  price:59.99, image:"/images/petalsilkscarf.jpg", category:"Fashion",    stock:20 },
+    { name:"Rain Lamp",          description:"Soothing rainfall simulation lamp",        price:49.99, image:"/images/rainlamp.webp", category:"Home",       stock:8  },
+    { name:"Sun Tea Set",        description:"Handcrafted ceramic sunny day tea set",    price:39.99, image:"/images/sunteaset.webp", category:"Kitchen",    stock:12 },
+    { name:"Petal Silk Scarf",   description:"Flowing silk with cherry blossom print",  price:59.99, image:"/images/petalsilkscarf.jpeg", category:"Fashion",    stock:20 },
     { name:"Storm Boots",        description:"Waterproof rainy day ankle boots",         price:89.99, image:"/images/stormboots.jpg", category:"Fashion",    stock:6  },
     { name:"Golden Sunflower",   description:"Dried sunflower arrangement in vase",      price:24.99, image:"/images/goldensunflower.jpg", category:"Home",       stock:18 },
     { name:"Blossom Face Mask",  description:"Cherry extract deep hydration mask",       price:19.99, image:"/images/blossomfacemask.jpg", category:"Beauty",     stock:30 },
     { name:"Cloud Diffuser",     description:"Ultrasonic mist diffuser rain-shaped",     price:44.99, image:"/images/clouddiffuser.jpg", category:"Home",       stock:10 },
-    { name:"Citrus Body Scrub",  description:"Sunny citrus coconut exfoliating scrub",   price:22.99, image:"/images/citrusbody scrub.jpg", category:"Beauty",     stock:25 },
-    { name:"Petal Journal",      description:"Cherry blossom embossed leather journal",  price:34.99, image:"/images/petalsilkscarff.jpg", category:"Stationery", stock:14 },
+    { name:"Citrus Body Scrub",  description:"Sunny citrus coconut exfoliating scrub",   price:22.99, image:"/images/citrusbody scrub.jpeg", category:"Beauty",     stock:25 },
+    { name:"Petal Journal",      description:"Cherry blossom embossed leather journal",  price:34.99, image:"/images/petalsilkscarff.webp", category:"Stationery", stock:14 },
     { name:"Rain Sound Speaker", description:"Bluetooth speaker with nature sounds",     price:79.99, image:"/images/rainsoundspeaker.jpg", category:"Tech",       stock:7  },
-    { name:"Sunshine Candle",    description:"Hand-poured beeswax citrus candle",        price:18.99, image:"/images/sunshinecandle.jpg", category:"Home",       stock:22 },
+    { name:"Sunshine Candle",    description:"Hand-poured beeswax citrus candle",        price:18.99, image:"/images/sunshinecandle.jpeg", category:"Home",       stock:22 },
   ];
   products.forEach(p => db.products.push({ id: db._nextId.products++, ...p, created_at: new Date().toISOString() }));
   saveDB(db);
