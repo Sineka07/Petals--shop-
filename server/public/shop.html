@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shop — Petal Shop ??</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Lora:ital,wght@0,400;0,600;1,400&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div id="particles"></div>
+  <nav class="navbar" id="navbar"></nav>
+  <div id="toast"></div>
+
+  <section class="section">
+    <h2 class="section-title">All Products</h2>
+    <p class="section-sub">Discover our full collection</p>
+
+    <div class="filter-bar">
+      <input class="search-input" type="text" id="search" placeholder="Search products..." oninput="filterProducts()" />
+      <div id="cat-filters" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
+      <select class="sort-select" id="sort" onchange="filterProducts()">
+        <option value="">Sort by</option>
+        <option value="price_asc">Price: Low to High</option>
+        <option value="price_desc">Price: High to Low</option>
+      </select>
+    </div>
+
+    <div class="products-grid" id="products-grid">
+      <div class="empty-state"><div class="empty-icon">??</div><p>Loading...</p></div>
+    </div>
+  </section>
+
+  <footer><span class="footer-logo">?? Petal Shop</span></footer>
+
+  <script src="/js/app.js"></script>
+  <script>
+    let allProducts = [];
+    let activeCategory = 'All';
+
+    function getImgHtml(image, name) {
+      if (!image) return '<div style="font-size:48px;display:flex;align-items:center;justify-content:center;height:100%;">???</div>';
+      if (image.startsWith('/')) return `<img src="${image}" alt="${name}" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.innerHTML='<div style=font-size:48px;display:flex;align-items:center;justify-content:center;height:100%;>???</div>'" />`;
+      return `<div style="font-size:64px;display:flex;align-items:center;justify-content:center;height:100%;">${image}</div>`;
+    }
+
+    async function loadProducts() {
+      const res = await fetch('/api/products');
+      allProducts = await res.json();
+      renderCategories();
+      renderProducts(allProducts);
+    }
+
+    function renderCategories() {
+      const cats = ['All', ...new Set(allProducts.map(p => p.category))];
+      document.getElementById('cat-filters').innerHTML = cats.map(c =>
+        `<button class="filter-btn ${c === 'All' ? 'active' : ''}" onclick="setCategory('${c}')" id="cat-${c}">${c}</button>`
+      ).join('');
+    }
+
+    function setCategory(cat) {
+      activeCategory = cat;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('cat-' + cat)?.classList.add('active');
+      filterProducts();
+    }
+
+    function filterProducts() {
+      const search = document.getElementById('search').value.toLowerCase();
+      const sort   = document.getElementById('sort').value;
+      let filtered = allProducts.filter(p => {
+        const matchCat  = activeCategory === 'All' || p.category === activeCategory;
+        const matchSrch = !search || p.name.toLowerCase().includes(search) || p.description.toLowerCase().includes(search);
+        return matchCat && matchSrch;
+      });
+      if (sort === 'price_asc')  filtered.sort((a,b) => a.price - b.price);
+      if (sort === 'price_desc') filtered.sort((a,b) => b.price - a.price);
+      renderProducts(filtered);
+    }
+
+    function renderProducts(products) {
+      const grid = document.getElementById('products-grid');
+      if (!products.length) {
+        grid.innerHTML = `<div class="empty-state"><div class="empty-icon">??</div><h3>No products found</h3></div>`;
+        return;
+      }
+      grid.innerHTML = products.map(p => `
+        <div class="product-card" onclick="location.href='/product/${p.id}'">
+          <div class="product-img">${getImgHtml(p.image, p.name)}</div>
+          <div class="product-body">
+            <div class="product-category">${p.category || ''}</div>
+            <div class="product-name">${p.name}</div>
+            <div class="product-desc">${p.description || ''}</div>
+            <div class="product-footer">
+              <span class="product-price">$${Number(p.price).toFixed(2)}</span>
+              <button class="add-to-cart-btn" onclick="event.stopPropagation();Cart.add(${p.id})">+</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    document.addEventListener('DOMContentLoaded', loadProducts);
+  </script>
+</body>
+</html>

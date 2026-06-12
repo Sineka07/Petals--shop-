@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Checkout — Petal Shop 🌸</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Lora:ital,wght@0,400;0,600;1,400&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div id="particles"></div>
+  <nav class="navbar" id="navbar"></nav>
+  <div id="toast"></div>
+
+  <div class="checkout-grid">
+    <!-- Form -->
+    <div class="checkout-form">
+      <h2>Delivery Details</h2>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">First Name</label>
+          <input class="form-input" type="text" id="fname" placeholder="Sneha" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Last Name</label>
+          <input class="form-input" type="text" id="lname" placeholder="K" required />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Street Address</label>
+        <input class="form-input" type="text" id="street" placeholder="123 Blossom Lane" required />
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">City</label>
+          <input class="form-input" type="text" id="city" placeholder="Chennai" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">PIN Code</label>
+          <input class="form-input" type="text" id="pin" placeholder="600001" required />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Phone</label>
+        <input class="form-input" type="tel" id="phone" placeholder="+91 98765 43210" required />
+      </div>
+
+      <h2 style="margin-top:28px">Payment</h2>
+      <div style="background:var(--bg2);border:1px solid var(--card-border);border-radius:12px;padding:20px;margin-bottom:16px">
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;margin-bottom:12px">
+          <input type="radio" name="payment" value="cod" checked /> Cash on Delivery
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
+          <input type="radio" name="payment" value="card" /> Card (Demo)
+        </label>
+      </div>
+
+      <button class="btn btn-primary" style="width:100%;font-size:16px" onclick="placeOrder()">
+        Place Order 🌸
+      </button>
+      <div class="form-error" id="checkout-err"></div>
+    </div>
+
+    <!-- Order Summary -->
+    <div>
+      <div class="cart-summary">
+        <h3 style="font-family:var(--font-display);font-size:20px;margin-bottom:16px">Order Summary</h3>
+        <div id="checkout-items"></div>
+        <div class="summary-total" style="margin-top:12px">
+          <span>Total</span><span id="checkout-total">$0.00</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer><span class="footer-logo">🌸 Petal Shop</span></footer>
+
+  <script src="/js/app.js"></script>
+  <script>
+    let cartItems = [];
+
+    async function loadCheckout() {
+      if (!Auth.isLoggedIn()) {
+        showToast('Please login to checkout');
+        setTimeout(() => location.href = '/auth', 1500);
+        return;
+      }
+      cartItems = await Cart.get();
+      if (!cartItems.length) { location.href = '/cart'; return; }
+      let total = 0;
+      document.getElementById('checkout-items').innerHTML = cartItems.map(item => {
+        const line = item.product.price * item.quantity;
+        total += line;
+        return `<div class="summary-row">
+          <span>${item.product.image.startsWith('/') 
+    ? `<img src="${item.product.image}" style="width:28px;height:28px;object-fit:cover;border-radius:4px;vertical-align:middle;" />`
+    : item.product.image
+  } 
+  ${item.product.name} × ${item.quantity}</span>
+          <span>$${line.toFixed(2)}</span>
+        </div>`;
+      }).join('');
+      document.getElementById('checkout-total').textContent = '$' + total.toFixed(2);
+    }
+
+    async function placeOrder() {
+      const err     = document.getElementById('checkout-err');
+      const address = `${document.getElementById('fname').value} ${document.getElementById('lname').value}, ${document.getElementById('street').value}, ${document.getElementById('city').value} - ${document.getElementById('pin').value}, Ph: ${document.getElementById('phone').value}`;
+      const items   = cartItems.map(i => ({ productId: i.productId, quantity: i.quantity, price: i.product.price }));
+      const total   = items.reduce((s, i) => s + i.price * i.quantity, 0);
+
+      try {
+        const res  = await fetch('/api/orders/place', {
+          method: 'POST',
+          headers: Auth.headers(),
+          body: JSON.stringify({ address, items, total })
+        });
+        const data = await res.json();
+        if (!res.ok) { err.textContent = data.error; return; }
+        showToast('🎉 Order placed successfully!');
+        await Cart.clear();
+        setTimeout(() => location.href = '/orders', 1500);
+      } catch { err.textContent = 'Error placing order'; }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadCheckout);
+  </script>
+</body>
+</html>

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cart — Petal Shop ??</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Lora:ital,wght@0,400;0,600;1,400&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div id="particles"></div>
+  <nav class="navbar" id="navbar"></nav>
+  <div id="toast"></div>
+
+  <section class="section">
+    <h2 class="section-title">Your Cart ??</h2>
+    <div id="cart-wrapper">
+      <div class="empty-state"><div class="empty-icon">??</div><p>Loading...</p></div>
+    </div>
+  </section>
+
+  <footer><span class="footer-logo">?? Petal Shop</span></footer>
+
+  <script src="/js/app.js"></script>
+  <script>
+    function getImgHtml(image, name) {
+      if (!image) return '???';
+      if (image.startsWith('/')) return `<img src="${image}" alt="${name}" style="width:48px;height:48px;object-fit:cover;border-radius:8px;" />`;
+      return `<span style="font-size:36px;">${image}</span>`;
+    }
+
+    async function loadCart() {
+      const wrapper = document.getElementById('cart-wrapper');
+      try {
+        const items = await Cart.get();
+
+        if (!items || items.length === 0) {
+          wrapper.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-icon">??</div>
+              <h3>Your cart is empty</h3>
+              <p>Add some beautiful products!</p>
+              <a href="/shop" class="btn btn-primary" style="margin-top:16px;">Shop Now</a>
+            </div>`;
+          return;
+        }
+
+        let subtotal = 0;
+        const itemsHtml = items.map(item => {
+          if (!item.product) return '';
+          const lineTotal = item.product.price * item.quantity;
+          subtotal += lineTotal;
+          return `
+            <div class="cart-item" id="item-${item.productId}">
+              <div class="cart-item-img">${getImgHtml(item.product.image, item.product.name)}</div>
+              <div class="cart-item-info">
+                <div class="cart-item-name">${item.product.name}</div>
+                <div class="cart-item-price">$${Number(item.product.price).toFixed(2)} each</div>
+              </div>
+              <div class="qty-controls">
+                <button class="qty-btn" onclick="updateQty(${item.productId}, ${item.quantity - 1})">-</button>
+                <span class="qty-num">${item.quantity}</span>
+                <button class="qty-btn" onclick="updateQty(${item.productId}, ${item.quantity + 1})">+</button>
+              </div>
+              <div style="font-family:var(--font-display);font-size:18px;font-weight:600;color:var(--accent);min-width:70px;text-align:right;">
+                $${lineTotal.toFixed(2)}
+              </div>
+              <button class="remove-btn" onclick="removeItem(${item.productId})">???</button>
+            </div>`;
+        }).join('');
+
+        wrapper.innerHTML = `
+          <div style="display:grid;grid-template-columns:1fr 320px;gap:32px;align-items:start;">
+            <div>
+              ${itemsHtml}
+            </div>
+            <div class="cart-summary">
+              <h3 style="font-family:var(--font-display);font-size:20px;margin-bottom:16px;">Order Summary</h3>
+              <div class="summary-row"><span>Subtotal</span><span>$${subtotal.toFixed(2)}</span></div>
+              <div class="summary-row"><span>Shipping</span><span>Free ??</span></div>
+              <div class="summary-total"><span>Total</span><span>$${subtotal.toFixed(2)}</span></div>
+              <button class="btn btn-primary" style="width:100%;margin-top:20px;" onclick="location.href='/checkout'">
+                Checkout ?
+              </button>
+              <a href="/shop" class="btn btn-outline" style="width:100%;margin-top:10px;display:flex;justify-content:center;">
+                Continue Shopping
+              </a>
+            </div>
+          </div>`;
+
+      } catch (err) {
+        console.error('Cart error:', err);
+        wrapper.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">??</div>
+            <h3>Could not load cart</h3>
+            <p>Please refresh the page</p>
+            <button class="btn btn-primary" onclick="loadCart()" style="margin-top:16px;">Retry</button>
+          </div>`;
+      }
+    }
+
+    async function updateQty(productId, qty) {
+      await Cart.update(productId, qty);
+      loadCart();
+    }
+
+    async function removeItem(productId) {
+      await Cart.remove(productId);
+      loadCart();
+    }
+
+    document.addEventListener('DOMContentLoaded', loadCart);
+  </script>
+</body>
+</html>
