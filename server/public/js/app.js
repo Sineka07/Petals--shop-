@@ -7,8 +7,8 @@
 const THEMES  = ['cherry', 'rainy', 'sunny'];
 const THEME_LABELS = { cherry: '🌸', rainy: '🌧️', sunny: '☀️' };
 const THEME_PARTICLES = {
-  cherry: ['🌸','🌺','🌷','✿'],
-  rainy:  ['💧','🌧','💦','·'],
+  cherry: ['🌸','🌺','🌷','✿','🌿','🪻','🌻'],
+  rainy:  ['💧','🌧','💦','·','⚡','🌈'],
   sunny:  ['☀️','✨','🌟','💛']
 };
 let currentThemeIdx = parseInt(localStorage.getItem('themeIdx') || '0');

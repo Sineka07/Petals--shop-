@@ -21,7 +21,7 @@
   --badge:       #D4476B;
   --font-display:'Cormorant Garamond', Georgia, serif;
   --font-body:   'DM Sans', sans-serif;
-  --particle:    '🌸';
+  --particle:    '🌸','🌿';
   --hero-grad:   linear-gradient(135deg, #FDE8EF 0%, #FFF5F8 50%, #FAD4E4 100%);
   --btn-grad:    linear-gradient(135deg, #D4476B, #E8607A);
 }
